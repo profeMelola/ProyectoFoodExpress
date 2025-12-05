@@ -79,6 +79,8 @@ public String create(
 
 ```
 
+Vista completa actualizada: https://github.com/profeMelola/ProyectoFoodExpress/blob/main/FoodExpress/recursosII/create-success.html
+
 #### Componentización. Fragmentos
 
 - Evitar duplicar HTML.
