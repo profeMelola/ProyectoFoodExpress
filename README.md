@@ -43,8 +43,6 @@ public String showForm(Model model, Principal principal) {
     model.addAttribute("mode", "create");
     return "restaurants/restaurant-form";
 }
-
-
 ```
 
 
@@ -83,16 +81,127 @@ public String create(
 
 #### Componentización. Fragmentos
 
+- Evitar duplicar HTML.
+- Mejorar legibilidad.
+- Centralizar errores de validación
+
+En una app típica tienes:
+
+- create.html
+- edit.html
 - restaurant-form.html
-- form-errors.html (fragment)
+- errores de validación repetidos
+
+Con Thymeleaf Fragments puedes:
+
+- Reutilizar un solo formulario
+- Mostrar errores de manera uniforme
+- Separar el diseño del contenido
+- Mejorar la mantenibilidad
+
+**Ejemplo de fragmento de errores:**
+
+fragments/form-errors.html:
 
 ```
-<div th:replace="~{fragments/form-errors :: error(field='phone')}"></div>
+<!-- Fragmento para mostrar errores de un campo concreto -->
+<div th:fragment="error(field)">
+    <div th:if="${#fields.hasErrors(field)}"
+         class="text-danger small mt-1">
+        <span th:errors="${field}"></span>
+    </div>
+</div>
 
 ```
 
+Uso del fragmento en el formulario:
 
+```
+<!-- Fragmento para mostrar errores de un campo concreto -->
+<div th:fragment="error(field)">
+    <div th:if="${#fields.hasErrors(field)}"
+         class="text-danger small mt-1">
+        <span th:errors="${field}"></span>
+    </div>
+</div>
 
+```
+
+Así quedaría restaurant-form.html:
+
+```
+<div class="container mt-5">
+
+    <h2 class="mb-4" 
+        th:text="${mode == 'create'} ? 'Create Restaurant' : 'Edit Restaurant'"></h2>
+
+    <!-- Show error general -->
+    <div th:if="${errorMessage}" 
+         class="alert alert-danger" 
+         th:text="${errorMessage}">
+    </div>
+
+    <form th:action="${mode == 'create'} 
+                       ? '/restaurants/create' 
+                       : '/restaurants/update/' + ${restaurant.id}}"
+          th:object="${restaurant}" 
+          method="post"
+          class="card p-4 shadow">
+
+        <!-- Campo Name -->
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input th:field="*{name}" class="form-control" required>
+            <div th:replace="~{fragments/form-errors :: error(field='name')}"></div>
+        </div>
+
+        <!-- Campo Address -->
+        <div class="mb-3">
+            <label class="form-label">Address</label>
+            <input th:field="*{address}" class="form-control">
+            <div th:replace="~{fragments/form-errors :: error(field='address')}"></div>
+        </div>
+
+        <!-- Campo Phone -->
+        <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input th:field="*{phone}" class="form-control">
+            <div th:replace="~{fragments/form-errors :: error(field='phone')}"></div>
+        </div>
+
+        <!-- Campo hidden ID solo en actualización -->
+        <input type="hidden" th:if="${mode == 'update'}" th:field="*{id}"/>
+
+        <!-- Botones -->
+        <button class="btn btn-primary" 
+                th:text="${mode == 'create'} ? 'Create' : 'Update'">
+        </button>
+
+        <a th:href="@{/dashboard}" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+
+```
+
+Un paso más:
+
+```
+<div th:fragment="field(label, fieldName)">
+    <div class="mb-3">
+        <label class="form-label" th:text="${label}"></label>
+        <input th:field="*{${fieldName}}" class="form-control">
+        <div th:replace="~{fragments/form-errors :: error(field=${fieldName})}"></div>
+    </div>
+</div>
+
+```
+
+Y se usaría así:
+
+```
+<div th:replace="~{fragments/form-field :: field('Phone', 'phone')}"></div>
+
+```
 
 ## BLOQUE B
 
