@@ -116,18 +116,6 @@ fragments/form-errors.html:
 
 ```
 
-Uso del fragmento en el formulario:
-
-```
-<!-- Fragmento para mostrar errores de un campo concreto -->
-<div th:fragment="error(field)">
-    <div th:if="${#fields.hasErrors(field)}"
-         class="text-danger small mt-1">
-        <span th:errors="${field}"></span>
-    </div>
-</div>
-
-```
 
 Así quedaría restaurant-form.html:
 
@@ -212,7 +200,190 @@ Y se usaría así:
 - sort=name,asc
 - Pasarlo a Thymeleaf con page.number, page.totalPages, etc.
 - Hacer paginación en MVC + API REST
-- Ejemplo práctico con el listado de restaurantes o pedidos
+- Ejemplo práctico con el listado de platos.
+
+**Práctica guiada a realizar en clase:**
+
+1. Vamos a recibir del API un ErrorDTO en caso de error:
+
+```
+@Data
+public class ErrorDTO {
+
+    private LocalDateTime timestamp; // Momento del error
+    private int status;              // Código HTTP (404, 400, 500...)
+    private String error;            // Nombre del error: "Not Found", "Bad Request"...
+    private String message;          // Mensaje detallado
+    private String path;             // Endpoint que falló (/api/dishes, etc.)
+}
+```
+
+2. Spring Data devuelve un Page&lt;DishResponseDTO&gt; en el API, que en JSON similar a:
+
+```
+{
+  "content": [ ... ],
+  "number": 0,
+  "size": 5,
+  "totalElements": 23,
+  "totalPages": 5,
+  "first": true,
+  "last": false
+}
+
+```
+
+3. En la app MVC vamos a mapear dicho JSON a un DTO propio:
+
+```
+@Data
+public class PageResponse<T> {
+
+    private List<T> content;
+
+    private int number;         // página actual (0-based)
+    private int size;           // tamaño de página
+    private long totalElements; // total de registros
+    private int totalPages;     // total de páginas
+
+    private boolean first;
+    private boolean last;
+}
+
+```
+
+4. Servicio: WebClient con paginación y manejo de errores
+
+- Recibir page y size en el servicio.
+- Llamar al API /dishes?page=...&size=....
+- Si OK → PageResponsePage&lt;DishResponseDTO&gt;.
+- Si error HTTP → leer ErrorDTO y lanzar excepción propia.
+- En MVC, seguiremos bloqueando al final con .block() (porque Thymeleaf + Spring MVC es síncrono).
+- Uso de onStatus en el WebClient
+
+```
+@Service
+@RequiredArgsConstructor
+public class DishService {
+
+    private final WebClient webClientAPI;
+
+    public PageResponse<DishResponseDTO> getAllDishes(int page, int size) {
+
+        try {
+            return webClientAPI
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/dishes")
+                            .queryParam("page", page)
+                            .queryParam("size", size)
+                            .build()
+                    )
+                    .retrieve()
+                    // Si el status es 4xx o 5xx, intento leer un ErrorDTO
+                    .onStatus(
+                            httpStatus -> httpStatus.is4xxClientError() || httpStatus.is5xxServerError(),
+                            clientResponse -> clientResponse.bodyToMono(ErrorDTO.class)
+                                    .defaultIfEmpty(new ErrorDTO()) // por si el body viene vacío
+                                    .flatMap(errorDto -> {
+                                        String msg = "Error al llamar al API /dishes: "
+                                                + (errorDto.getMessage() != null ? errorDto.getMessage() : "sin detalle");
+                                        return Mono.error(new ConnectionApiRestException(msg));
+                                    })
+                    )
+                    .bodyToMono(new ParameterizedTypeReference<PageResponse<DishResponseDTO>>() {})
+                    .block(); // En MVC clásico, bloqueamos aquí
+        } catch (Exception e) {
+            // Aquí puedes loguear o wrappear más info
+            throw new ConnectionApiRestException("Fallo de comunicación con el API /dishes", e);
+        }
+    }
+}
+
+```
+
+5. Controlador MVC con paginación
+
+El controlador tiene que:
+- Recibir page y size de la URL.
+- Llamar al servicio con esos valores.
+- Pasar a la vista:
+    - page → PageResponse&lt;DishResponseDTO&gt;
+    - dishes → page.content
+
+
+```
+@Controller
+@RequiredArgsConstructor
+public class DishController {
+
+    private final DishService dishService;
+
+    @GetMapping("/dishes")
+    public String listDishes(@RequestParam(defaultValue = "0") int page,
+                             @RequestParam(defaultValue = "5") int size,
+                             Model model) {
+
+        PageResponse<DishResponseDTO> dishPage = dishService.getAllDishes(page, size);
+
+        model.addAttribute("page", dishPage);
+        model.addAttribute("dishes", dishPage.getContent());
+
+        return "dishes/dishes";
+    }
+}
+```
+
+6. Plantilla Thymeleaf con paginación
+
+- Partimos de tu plantilla actual y solo le metemos:
+    - Uso de ${page.content} o ${dishes} 
+    - Un bloque &lt;nav&gt; con bootstrap para botones de página, previo, siguiente.
+
+```
+    <!-- PAGINATION -->
+    <nav class="mt-4" th:if="${page.totalPages > 1}">
+        <ul class="pagination justify-content-center">
+
+            <!-- Botón "Previous" -->
+            <li class="page-item" th:classappend="${page.first} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/dishes(page=${page.number - 1}, size=${page.size})}">
+                    Previous
+                </a>
+            </li>
+
+            <!-- Números de página -->
+            <li class="page-item"
+                th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                th:classappend="${i == page.number} ? 'active'">
+                <a class="page-link"
+                   th:text="${i + 1}"
+                   th:href="@{/dishes(page=${i}, size=${page.size})}">
+                </a>
+            </li>
+
+            <!-- Botón "Next" -->
+            <li class="page-item" th:classappend="${page.last} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/dishes(page=${page.number + 1}, size=${page.size})}">
+                    Next
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+    <div class="text-center mt-4">
+        <a th:href="@{/dashboard}" class="btn btn-outline-primary">Back to Dashboard</a>
+    </div>
+
+</main>
+```
+
+- #numbers.sequence(0, page.totalPages - 1) → genera los índices de páginas.
+- page.number es base 0, pero i + 1 es lo que ve el usuario.
+- page.first y page.last para deshabilitar prev/next.
 
 ### B.2 JPQL + Query Methods
 
