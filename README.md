@@ -396,8 +396,8 @@ public class DishController {
 
 ### B.2 JPA Avanzado
 
-- [Estrategias LAZY, EAGER]()
-- [Save vs SaveAll]()
+- [Estrategias LAZY, EAGER](https://github.com/profeMelola/ProyectoFoodExpress?tab=readme-ov-file#estrategias-lazy-eager)
+- [Save vs SaveAll](https://github.com/profeMelola/ProyectoFoodExpress?tab=readme-ov-file#diferencia-save-y-saveall)
 - [Introducción a JPQL](https://github.com/profeMelola/DWES-03-2025-26/blob/main/APOYO_TEORIA/JPQL.md)
 - Búsquedas con filtros
 - Transacciones en JPA/Spring (@Transactional)
