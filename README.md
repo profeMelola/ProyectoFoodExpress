@@ -477,7 +477,7 @@ Cuando JPA encuentra una relación entre entidades, debe decidir cuándo cargar 
 | --------------- | ------- | ------------------ | ---------------------------------- |
 | **@ManyToOne**  | EAGER   | Debería ser LAZY | Puede cargar demasiada información |
 | **@OneToMany**  | LAZY    | Mantener LAZY    | Suelen ser listas grandes          |
-| **@OneToOne**   | EAGER   | Depende            |                                    |
+| **@OneToOne**   | EAGER   | Debería ser LAZY (EAGER está deprecado en la mayoría de los casos)            |                                    |
 | **@ManyToMany** | LAZY    | LAZY             | Tablas de unión enormes            |
 
 **Diferencia save y saveAll**
