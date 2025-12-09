@@ -396,14 +396,14 @@ public class DishController {
 
 ### B.2 JPA Avanzado
 
-- Estrategias LAZY, EAGER...
-- Save vs SaveAll
+- [Estrategias LAZY, EAGER]()
+- [Save vs SaveAll]()
 - [Introducción a JPQL](https://github.com/profeMelola/DWES-03-2025-26/blob/main/APOYO_TEORIA/JPQL.md)
 - Búsquedas con filtros
 - Transacciones en JPA/Spring (@Transactional)
 
 
-**Estrategias LAZY, EAGER**
+#### **Estrategias LAZY, EAGER**
 
 Cuando JPA encuentra una relación entre entidades, debe decidir cuándo cargar la información relacionada:
 
@@ -480,7 +480,9 @@ Cuando JPA encuentra una relación entre entidades, debe decidir cuándo cargar 
 | **@OneToOne**   | EAGER   | Debería ser LAZY (EAGER está deprecado en la mayoría de los casos)            |                                    |
 | **@ManyToMany** | LAZY    | LAZY             | Tablas de unión enormes            |
 
-**Diferencia save y saveAll**
+
+
+#### **Diferencia save y saveAll**
 
 
 | Aspecto       | `save()`                   | `saveAll()`                           |
