@@ -598,6 +598,18 @@ public class MealController {
 
 ```
 
+En un futuro:
+
+| Tipo        | Significa                    | Emite        | Uso típico                       |
+| ----------- | ---------------------------- | ------------ | -------------------------------- |
+| **Mono<T>** | promesa de *un valor* futuro | 0..1 valores | llamadas HTTP, logins, consultas |
+| **Flux<T>** | secuencia de valores         | 0..N valores | streaming, listas, colas         |
+
+
+La inmensa mayoría de las llamadas HTTP devuelven:
+- un único JSON
+- o un error
+
 ## BLOQUE D — Upload/Storage de ficheros, caché, loggin, email..
 
 ### D.1 Upload de imágenes / MultipartFile
