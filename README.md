@@ -399,12 +399,8 @@ public class DishController {
 - Estrategias LAZY, EAGER...
 - Save vs SaveAll
 - [Introducción a JPQL](https://github.com/profeMelola/DWES-03-2025-26/blob/main/APOYO_TEORIA/JPQL.md)
-- Ejemplos con joins
-- Resolver queries complejas del examen
-- Cuándo usar @Query
-- Métodos por convención
 - Búsquedas con filtros
-- Transacciones en JPA/Spring (@Transactional): qué son, para qué sirven y cuándo se aplican
+- Transacciones en JPA/Spring (@Transactional)
 
 
 **Estrategias LAZY, EAGER**
