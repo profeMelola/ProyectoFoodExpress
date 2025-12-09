@@ -204,7 +204,7 @@ Y se usaría así:
 
 **Práctica guiada a realizar en clase:**
 
-1. Vamos a recibir del API un ErrorDTO en caso de error:
+```1. Vamos a recibir del API un ErrorDTO en caso de error:```
 
 ```
 @Data
@@ -218,7 +218,7 @@ public class ErrorDTO {
 }
 ```
 
-2. Spring Data devuelve un Page&lt;DishResponseDTO&gt; en el API, que en JSON similar a:
+```2. Spring Data devuelve un Page&lt;DishResponseDTO&gt; en el API, que en JSON similar a:```
 
 ```
 {
@@ -233,7 +233,7 @@ public class ErrorDTO {
 
 ```
 
-3. En la app MVC vamos a mapear dicho JSON a un DTO propio:
+```3. En la app MVC vamos a mapear dicho JSON a un DTO propio:```
 
 ```
 @Data
@@ -252,7 +252,7 @@ public class PageResponse<T> {
 
 ```
 
-4. Servicio: WebClient con paginación y manejo de errores
+```4. Servicio: WebClient con paginación y manejo de errores```
 
 - Recibir page y size en el servicio.
 - Llamar al API /dishes?page=...&size=....
@@ -311,7 +311,7 @@ public class DishService {
 [Más detalle sobre programación reactiva](
 https://github.com/profeMelola/ProyectoFoodExpress?tab=readme-ov-file#c3-llamada-a-api-p%C3%BAblica-con-programaci%C3%B3n-reactiva)
 
-5. Controlador MVC con paginación
+```5. Controlador MVC con paginación```
 
 El controlador tiene que:
 - Recibir page y size de la URL.
@@ -343,10 +343,10 @@ public class DishController {
 }
 ```
 
-6. Plantilla Thymeleaf con paginación
+```6. Plantilla Thymeleaf con paginación```
 
 - Partimos de tu plantilla actual y solo le metemos:
-    - Uso de ${page.content} o ${dishes} 
+    - Uso de ```${page.content} o ${dishes} ```
     - Un bloque &lt;nav&gt; con bootstrap para botones de página, previo, siguiente.
 
 ```
