@@ -308,6 +308,9 @@ public class DishService {
     - son parte del pipeline interno que WebClient necesita para funcionar.
 - La aplicación NO es reactiva, pero el cliente WebClient sí lo es.
 
+[Más detalle sobre programación reactiva](
+https://github.com/profeMelola/ProyectoFoodExpress?tab=readme-ov-file#c3-llamada-a-api-p%C3%BAblica-con-programaci%C3%B3n-reactiva)
+
 5. Controlador MVC con paginación
 
 El controlador tiene que:
