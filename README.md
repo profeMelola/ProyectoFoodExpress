@@ -394,16 +394,117 @@ public class DishController {
 - page.number es base 0, pero i + 1 es lo que ve el usuario.
 - page.first y page.last para deshabilitar prev/next.
 
-### B.2 JPQL + Query Methods
+### B.2 JPA Avanzado
 
+- Estrategias LAZY, EAGER...
 - Save vs SaveAll
-- Introducción a JPQL 
+- [Introducción a JPQL](https://github.com/profeMelola/DWES-03-2025-26/blob/main/APOYO_TEORIA/JPQL.md)
 - Ejemplos con joins
 - Resolver queries complejas del examen
 - Cuándo usar @Query
 - Métodos por convención
 - Búsquedas con filtros
 - Transacciones en JPA/Spring (@Transactional): qué son, para qué sirven y cuándo se aplican
+
+
+**Estrategias LAZY, EAGER**
+
+Cuando JPA encuentra una relación entre entidades, debe decidir cuándo cargar la información relacionada:
+
+- LAZY = cargar solo cuando se necesita.
+    - JPA NO carga la relación al hacer la consulta principal.
+    - En su lugar, pone un proxy (un objeto falso) que solo ejecuta la consulta cuando realmente accedes al atributo.
+    - Bajo demanda.
+    - Si intentas acceder fuera del contexto de persistencia (por ejemplo desde un Controller o al serializar JSON), obtienes LazyInitializationException
+        - La entidad se lee en el Service (dentro de transacción)
+        - Se devuelve al Controller
+        - Jackson intenta hacer JSON
+        - Intenta acceder a la colección LAZY
+        - Solución: usa DTOs o JOIN FETCH!!!!
+
+            - Ejemplo de error:
+
+            En la entidad:
+
+            ```
+            @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY)
+            private List<Dish> dishes;
+            ```
+
+            En el servicio:
+
+            ```
+                // Hibernate NO carga los dishes.
+                // En su lugar pone un proxy, una lista vacía especial que “se activará” cuando la uses.
+                Restaurant r = restaurantRepository.findById(id).get();
+            ```
+
+            En el controlador:
+
+            ```
+                // Aquí obtendrás la excepción LazyInitializationException
+                r.getDishes().size();
+
+            ```
+
+            - Ejemplo de solución:
+                - Sigue siendo LAZY.
+                - Solo cargas la relación cuando tú lo decides, no cuando Hibernate quiera.
+
+
+            ```
+                @Query("""
+                    SELECT r FROM Restaurant r
+                    JOIN FETCH r.dishes
+                    WHERE r.id = :id
+                """)
+                Restaurant findWithDishes(Long id);
+
+                /*
+                // Lo que hibernate ejecuta internamente
+                    SELECT r.*, d.*
+                    FROM restaurants r
+                    JOIN dishes d ON d.restaurant_id = r.id
+                    WHERE r.id = ?
+                */
+
+            ```
+
+- EAGER = cargar siempre todo desde el principio
+    - Cuando haces una consulta, JPA carga inmediatamente la entidad y todas sus relaciones marcadas como EAGER, aunque NO las uses.
+    - Es carga anticipada.
+    - Puedes generar consultas enormes con muchos JOINs automáticamente.
+    - Puedes traer de base de datos miles de registros sin necesitarlos.
+    - Aumenta el tiempo de respuesta.
+
+| Relación        | Default | ¿Recomendado?      | Motivo                             |
+| --------------- | ------- | ------------------ | ---------------------------------- |
+| **@ManyToOne**  | EAGER   | Debería ser LAZY | Puede cargar demasiada información |
+| **@OneToMany**  | LAZY    | Mantener LAZY    | Suelen ser listas grandes          |
+| **@OneToOne**   | EAGER   | Depende            |                                    |
+| **@ManyToMany** | LAZY    | LAZY             | Tablas de unión enormes            |
+
+**Diferencia save y saveAll**
+
+
+| Aspecto       | `save()`                   | `saveAll()`                           |
+| ------------- | -------------------------- | ------------------------------------- |
+| Nº entidades  | 1                          | Muchas                                |
+| SQL ejecutado | 1 INSERT/UPDATE            | N INSERT/UPDATE (uno por entidad)     |
+| Devuelve      | Una entidad                | Iterable de entidades                 |
+| Performance   | Alta                       | Depende, puede ser lenta sin batching o bulk insert (hay que configurar jpa e Hibernate agruparía todas las entidades de saveAll en batch. Problemas con GenerationType.IDENTITY...)|
+| Caso de uso   | Crear/actualizar un objeto | Insertar listas completas             |
+
+| Método                   | ¿Hace batch?    | ¿Cuándo usarlo?                                |
+| ------------------------ | --------------- | ---------------------------------------------- |
+| `saveAll()` sin config   |  No            | Casos normales                                 |
+| `saveAll()` + batch_size |  Sí            | Cargar grandes listas (importaciones, seeders (data.sql)) |
+| JPQL bulk update/delete  |  Muy rápido    | Cambios masivos sin cargar entidades           |
+| SQL nativo múltiple      |  El más rápido | Operaciones sin usar JPA ni entidades          |
+
+
+
+
 
 ## BLOQUE C
 
