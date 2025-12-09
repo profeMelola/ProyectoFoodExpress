@@ -302,6 +302,12 @@ public class DishService {
 
 ```
 
+- WebClient siempre trabaja de forma reactiva y devuelve Mono.
+- En Spring MVC puedes bloquear (.block()) para recuperar el dato de forma síncrona.
+- Por eso se usan operadores reactivos como Mono.error, flatMap, bodyToMono:
+    - son parte del pipeline interno que WebClient necesita para funcionar.
+- La aplicación NO es reactiva, pero el cliente WebClient sí lo es.
+
 5. Controlador MVC con paginación
 
 El controlador tiene que:
@@ -398,12 +404,12 @@ public class DishController {
 
 ## BLOQUE C
 
-### C.1 Recuperar DTO y ErrorDTO usando WebClient
+### C.1 Recuperar DTO y ErrorDTO usando WebClient.
 
-- retrieve() vs exchangeToMono()
 - Procesar error 400/404 de forma limpia
 - Mapear ErrorDTO
 - Integrarlo en MVC (mostrar error en pantalla)
+
 
 ### C.2 JJWT
 
@@ -437,13 +443,160 @@ public class DishController {
 
 ```
 
-### C.3 Llamada a API pública
+### C.3 Llamada a API pública con PROGRAMACIÓN REACTIVA
 
-- Ejemplo con TheMealDB API o DogCEO
-- Llamada con WebClient
-- Convertir JSON a DTO
-- Mostrarlos en Thymeleaf
-- Endpoint /public/meals?name=burger
+Ejemplo con TheMealDB API: https://www.themealdb.com/api.php
+
+En **MVC clásico** el flujo es así: WebClient → Mono<T>  → .block() → T
+
+La aplicación SE QUEDA BLOQUEADA esperando la respuesta.
+
+En **WebFlux reactivo** el flujo es así: WebClient → Mono<T> → se devuelve tal cual → WebFlux sigue trabajando sin bloquear
+
+El servidor NO se bloquea, y puede atender más peticiones con menos hilos.
+
+Mientras WebClient espera la respuesta de un API externo, tu servidor NO está bloqueado y puede seguir atendiendo más peticiones.
+
+
+| Característica      | MVC clásico (bloqueante) | WebFlux (reactivo / no bloqueante) |
+| ------------------- | ------------------------ | ---------------------------------- |
+| Modelo de ejecución | Un hilo por petición     | Hilos compartidos (event loop)     |
+| WebClient           | `.block()`               | Devuelve `Mono`                    |
+| Rendimiento         | Limitado por hilos       | Escalable, miles de conexiones     |
+| Consumidores        | Navegadores, plantillas  | Micros, SPA, streaming             |
+| Flujo               | síncrono                 | asíncrono                          |
+| Escalabilidad       | moderada                 | muy alta (Node.js style)           |
+
+
+**MVC + .block() (modo clásico)**
+
+- El servidor espera la respuesta del API antes de continuar.
+- Cada petición ocupa un hilo
+- Más lento si hay muchas llamadas a APIs externas
+- Ideal para Thymeleaf, HTML server-side
+
+**WebFlux + reactivo (modo moderno)**
+
+- El servidor NO espera; sigue atendiendo otras peticiones.
+- Más eficiente para microservicios
+- Menos hilos → más escalable
+- Flujos asíncronos (Mono / Flux)
+- Perfecto microservicios, integración de APIs externas, streaming, aplicaciones altamente concurrentes
+
+**En una app MVC clásica con Thymeleaf, un servicio reactivo NO aporta nada**
+
+Porque en MVC:
+
+- El controlador necesita los datos antes de renderizar la vista.
+- Thymeleaf no puede procesar un Mono.
+- La petición se completa solo cuando tienes el modelo lleno.
+
+**¿Cuándo tiene mucho más sentido usar WebFlux?**
+
+- API Gateway (frontend → gateway → services)
+
+```
+Frontend → API Gateway (Spring Cloud Gateway o Kong o NGINX)
+          → Servicio Usuarios
+          → Servicio Pedidos
+          → Servicio Productos
+```
+
+- Microservicios que llaman a otros microservicios
+- Llamadas concurrentes a varias APIs externas
+
+
+Por ejemplo, pedir 3 endpoints externos a la vez:
+
+- /categories
+- /meals
+- /areas
+
+Con WebFlux: Mono.zip(service.getMeals(), service.getCategories(), service.getAreas())
+
+Con MVC clásico:
+
+- Harías 3 llamadas síncronas
+- Esperarías a que cada una terminara antes de la siguiente
+
+**Práctica guiada:**
+
+Usar WebClient de forma reactiva solo en el API REST, devolviendo JSON.
+
+- NO usar WebFlux en el MVC.
+- NO convertir toda la aplicación en reactiva (se escapa del ámbito del curso).
+- Solo un endpoint concreto usando programación reactiva real.
+
+```
+GET /api/meal-info?meal=Arrabiata
+
+```
+
+Dos llamadas en paralelo:
+
+- /search.php?s=Arrabiata — info del plato
+- /categories.php — categorías
+
+Y obtener algo así:
+
+```
+{
+  "meal": { ... },
+  "categories": [ ... ]
+}
+
+```
+
+Servicio reactivo:
+
+```
+@Service
+@RequiredArgsConstructor
+public class MealService {
+
+    private final WebClient webClient = WebClient.create("https://www.themealdb.com/api/json/v1/1");
+
+    public Mono<MealResponseDTO> getMeal(String meal) {
+        return webClient.get()
+                .uri(uri -> uri.path("/search.php").queryParam("s", meal).build())
+                .retrieve()
+                .bodyToMono(MealResponseDTO.class);
+    }
+
+    public Mono<CategoryResponseDTO> getCategories() {
+        return webClient.get()
+                .uri("/categories.php")
+                .retrieve()
+                .bodyToMono(CategoryResponseDTO.class);
+    }
+
+    public Mono<MealCombinedDTO> getMealWithCategories(String meal) {
+        return Mono.zip(
+                getMeal(meal),
+                getCategories()
+        ).map(tuple -> new MealCombinedDTO(tuple.getT1(), tuple.getT2()));
+    }
+}
+
+```
+
+Controlador REST reactivo:
+
+```
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api")
+public class MealController {
+
+    private final MealService mealService;
+
+    @GetMapping("/meal-info")
+    public Mono<MealCombinedDTO> getMealInfo(@RequestParam String meal) {
+        return mealService.getMealWithCategories(meal);
+    }
+}
+
+```
 
 ## BLOQUE D — Upload/Storage de ficheros, caché, loggin, email..
 
