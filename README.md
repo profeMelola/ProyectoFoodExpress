@@ -202,7 +202,11 @@ Y se usaría así:
 - Hacer paginación en MVC + API REST
 - Ejemplo práctico con el listado de platos.
 
-**Práctica guiada a realizar en clase:**
+**Práctica guiada a realizar en clase para montar paginación en API Rest:**
+
+Lo hemos hecho en clase.... 
+
+**Práctica guiada a realizar en clase para montar paginación en MVC:**
 
 ```1. Vamos a recibir del API un ErrorDTO en caso de error:```
 
