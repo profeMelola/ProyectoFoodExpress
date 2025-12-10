@@ -196,15 +196,14 @@ Y se usaría así:
 ## BLOQUE B
 
 ### B.1 Paginación y sorting en Spring Data
-- Pageable, PageRequest
+- Page, Pageable: page=0&size=5
 - sort=name,asc
-- Pasarlo a Thymeleaf con page.number, page.totalPages, etc.
 - Hacer paginación en MVC + API REST
 - Ejemplo práctico con el listado de platos.
 
 **Práctica guiada a realizar en clase para montar paginación en API Rest:**
 
-Lo hemos hecho en clase.... 
+Lo hemos hecho en clase....
 
 **Práctica guiada a realizar en clase para montar paginación en MVC:**
 
