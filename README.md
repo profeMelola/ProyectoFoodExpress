@@ -198,12 +198,15 @@ Y se usaría así:
 ### B.1 Paginación y sorting en Spring Data
 - Page, Pageable: page=0&size=5
 - sort=name,asc
+- [Apoyo teoría paginación](https://github.com/profeMelola/DWES-03-2025-26/blob/main/APOYO_TEORIA/Pageable.md)
 - Hacer paginación en MVC + API REST
 - Ejemplo práctico con el listado de platos.
 
 **Práctica guiada a realizar en clase para montar paginación en API Rest:**
 
-Lo hemos hecho en clase....
+[Realizado en clase - APIREST II - Grupo A](https://github.com/profeMelola/A_FoodExpressAPI_II)
+[Realizado en clase - APIREST II - Grupo B](https://github.com/profeMelola/B_FoodExpressAPI_II)
+
 
 **Práctica guiada a realizar en clase para montar paginación en MVC:**
 
