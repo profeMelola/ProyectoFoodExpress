@@ -445,11 +445,58 @@ Cuando JPA encuentra una relación entre entidades, debe decidir cuándo cargar 
 
             ```
                 // Aquí obtendrás la excepción LazyInitializationException
+                // La sesión de Hibernate ya está cerrada (porque saliste del Service).
+                // Saldrá este error: LazyInitializationException: could not initialize proxy
+
                 r.getDishes().size();
 
             ```
+            - Ejemplo de solución con DTO:
+                - DTO:
+                ```
+                // versión con record
+                // clase pensada para representar datos inmutables, como DTOs.
+                //Java genera automáticamente:
+                //    Atributos id, name, dishes
+                //    constructor(...)
+                //    getters (llamados “componentes”)
+                //    equals()
+                //    hashCode()
+                //    toString()
+                //    Sin necesidad de Lombok, sin getters, sin setters, sin boilerplate.
+                
+                public record RestaurantDTO(Long id, String name, List<String> dishes) {}
 
-            - Ejemplo de solución:
+                // versión clásica
+                public class RestaurantDTO {
+                    private Long id;
+                    private String name;
+                    private List<String> dishes;
+
+                    // constructor
+                    // getters
+                    // equals, hashCode, toString
+                }
+
+
+                ```
+                - Servicio:
+                ```
+                public RestaurantDTO getRestaurant(Long id) {
+                Restaurant r = restaurantRepository.findById(id).orElseThrow();
+
+                // AQUÍ dentro estamos aún en sesión de Hibernate
+                List<String> dishNames = r.getDishes().stream()
+                              .map(Dish::getName)
+                              .toList();
+
+                return new RestaurantDTO(r.getId(), r.getName(), dishNames);
+                }
+
+                ```
+
+
+            - Ejemplo de solución con JOIN FETCH:
                 - Sigue siendo LAZY.
                 - Solo cargas la relación cuando tú lo decides, no cuando Hibernate quiera.
 
