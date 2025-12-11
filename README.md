@@ -409,6 +409,44 @@ public class DishController {
 - Búsquedas con filtros
 - Transacciones en JPA/Spring (@Transactional)
 
+**Práctica guiada. Nuevos endpoints y uso de JPQL:**
+
+- JPQL con JOIN + DTO personalizado (vista de detalle completa)
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+- ¿Cuánto suma cada pedido?
+
+Implementa el código partiendo de este método del respositorio:
+
+```
+@Query("""
+        SELECT new es.daw.foodexpressapi.dto.OrderSummaryDTO(
+            o.id,
+            u.username,
+            r.name,
+            SUM(od.quantity),
+            SUM(od.subtotal)
+        )
+        FROM Order o
+        JOIN o.user u
+        JOIN o.restaurant r
+        JOIN o.details od
+        GROUP BY o.id, u.username, r.name
+        ORDER BY o.id
+        """)
+    List<OrderSummaryDTO> findAllOrderSummaries();
+```
+
+
+- ¿Cuánto ha gastado cada cliente?
+- ¿Qué restaurantes tienen más ventas?
+- ¿Cuáles son los platos más vendidos? 
+
+
+
 
 #### **Estrategias LAZY, EAGER**
 
