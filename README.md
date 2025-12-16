@@ -636,7 +636,6 @@ public class ErrorDTO {
 ```
 public PageResponse<DishResponseDTO> getAllDishes(int page, int size) {
 
-    try {
         return webClientAPI
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -677,9 +676,6 @@ public PageResponse<DishResponseDTO> getAllDishes(int page, int size) {
                 .bodyToMono(new ParameterizedTypeReference<PageResponse<DishResponseDTO>>() {})
                 .block();
 
-    } catch (Exception e) {
-        throw new ConnectionApiRestException("Error de comunicación con el API: " + e.getMessage());
-    }
 }
 
 ```
