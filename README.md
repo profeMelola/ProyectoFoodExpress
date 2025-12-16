@@ -413,7 +413,9 @@ public class DishController {
 
 ---
 
-## BLOQUE C - JPA Avanzado
+## BLOQUE C
+
+### C.1 JPA Avanzado
 
 - [Estrategias LAZY, EAGER](https://github.com/profeMelola/ProyectoFoodExpress?tab=readme-ov-file#estrategias-lazy-eager)
 - [Save vs SaveAll](https://github.com/profeMelola/ProyectoFoodExpress?tab=readme-ov-file#diferencia-save-y-saveall)
@@ -896,7 +898,7 @@ La inmensa mayoría de las llamadas HTTP devuelven:
 
 ---
 
-## BLOQUE E — Upload/Storage de ficheros, caché, loggin, email..
+## BLOQUE E
 
 ### E.1 Upload de imágenes / MultipartFile
 
