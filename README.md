@@ -407,7 +407,7 @@ public class DishController {
 - page.number es base 0, pero i + 1 es lo que ve el usuario.
 - page.first y page.last para deshabilitar prev/next.
 
-### B.2 JPA Avanzado
+## BLOQUE C - JPA Avanzado
 
 - [Estrategias LAZY, EAGER](https://github.com/profeMelola/ProyectoFoodExpress?tab=readme-ov-file#estrategias-lazy-eager)
 - [Save vs SaveAll](https://github.com/profeMelola/ProyectoFoodExpress?tab=readme-ov-file#diferencia-save-y-saveall)
