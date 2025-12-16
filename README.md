@@ -25,6 +25,8 @@ https://github.com/profeMelola/DWES-03-2025-26/tree/main/EJERCICIOS/FoodExpress
 - [BLOQUE D - WebClient](#bloque-d)
 - [BLOQUE E - Varios](#bloque-e)
 
+---
+
 ## BLOQUE A
 
 ### A.1. Spring I
@@ -198,6 +200,8 @@ Y se usaría así:
 <div th:replace="~{fragments/form-field :: field('Phone', 'phone')}"></div>
 
 ```
+
+---
 
 ## BLOQUE B
 
@@ -406,6 +410,8 @@ public class DishController {
 - #numbers.sequence(0, page.totalPages - 1) → genera los índices de páginas.
 - page.number es base 0, pero i + 1 es lo que ve el usuario.
 - page.first y page.last para deshabilitar prev/next.
+
+---
 
 ## BLOQUE C - JPA Avanzado
 
@@ -887,6 +893,8 @@ En un futuro:
 La inmensa mayoría de las llamadas HTTP devuelven:
 - un único JSON
 - o un error
+
+---
 
 ## BLOQUE E — Upload/Storage de ficheros, caché, loggin, email..
 
