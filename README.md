@@ -19,13 +19,19 @@ https://github.com/profeMelola/DWES-03-2025-26/tree/main/EJERCICIOS/FoodExpress
 ---
 # 2.  FoodExpres II
 
+- [BLOQUE A - Mejoras MVC](#bloque-a)
+- [BLOQUE B - Paginación](#bloque-b)
+- [BLOQUE C - JPA Avanzado](#bloque-c)
+- [BLOQUE D - WebClient](#bloque-d)
+- [BLOQUE E - Varios](#bloque-e)
+
 ## BLOQUE A
 
 ### A.1. Spring I
 - Explicación del examen.
 - Introducción a Testing.
 
-### A.2. Mejoras
+### A.2. Mejoras MVC
 
 #### Evitar F5-doble-submit (Post–Redirect–Get). FlashAttributes
 
@@ -610,9 +616,11 @@ En Spring:
 [Ejercicio - Crear un pedido completo](./crear-pedido.md)
 
 
-## BLOQUE C
+---
 
-### C.1 Recuperar DTO y ErrorDTO usando WebClient.
+## BLOQUE D
+
+### D.1 Recuperar DTO y ErrorDTO usando WebClient.
 
 - Procesar error 400/404 de forma limpia
 - Mapear ErrorDTO
@@ -681,7 +689,7 @@ public PageResponse<DishResponseDTO> getAllDishes(int page, int size) {
 ```
 
 
-### C.2 JJWT
+### D.2 JJWT
 
 - Refresh Tokens
 - Expiración real en el servidor (control server-side)
@@ -713,7 +721,7 @@ public PageResponse<DishResponseDTO> getAllDishes(int page, int size) {
 
 ```
 
-### C.3 Llamada a API pública con PROGRAMACIÓN REACTIVA
+### D.3 Llamada a API pública con PROGRAMACIÓN REACTIVA
 
 Ejemplo con TheMealDB API: https://www.themealdb.com/api.php
 
@@ -880,9 +888,9 @@ La inmensa mayoría de las llamadas HTTP devuelven:
 - un único JSON
 - o un error
 
-## BLOQUE D — Upload/Storage de ficheros, caché, loggin, email..
+## BLOQUE E — Upload/Storage de ficheros, caché, loggin, email..
 
-### D.1 Upload de imágenes / MultipartFile
+### E.1 Upload de imágenes / MultipartFile
 
 - Formulario con ```<input type="file">```
 - Manejo en controller (MultipartFile)
@@ -890,20 +898,20 @@ La inmensa mayoría de las llamadas HTTP devuelven:
 - Mostrarlo en la web.
 - Muy útil para el proyecto FoodExpress (fotos de restaurantes, platos…).
 
-### D.2 Caching + Logging
+### E.2 Caching + Logging
 
 - @Cacheable para búsquedas típicas
 - Logging con SLF4J. AOP (Programación Orientada a Aspectos)
     - AOP permite ejecutar código automáticamente antes o después de ciertos métodos, sin modificar esos métodos.
 - Buena práctica: logs de error, info, debug.
 
-### D.3 Envío de email básico
+### E.3 Envío de email básico
 
 - Spring Mail sender
 - Plantilla simple
 - Ejemplo: email de confirmación de registro
 
-### D.4 Spring Data Rest + Swagger/OpenAPI
+### E.4 Spring Data Rest + Swagger/OpenAPI
 
 - Mostrar cómo Spring genera una API REST completa
 - Paginated + HATEOAS
