@@ -593,7 +593,21 @@ Cuando JPA encuentra una relación entre entidades, debe decidir cuándo cargar 
 | SQL nativo múltiple      |  El más rápido | Operaciones sin usar JPA ni entidades          |
 
 
+#### **Transcciones**
 
+Una transacción agrupa varias operaciones contra la base de datos y garantiza:
+
+- Atomicidad: o se ejecutan todas, o ninguna.
+- Consistencia: la BD no queda en un estado inválido.
+- Aislamiento y Durabilidad (solo mencionar).
+
+En Spring:
+
+- @Transactional abre y cierra la transacción automáticamente.
+- Si ocurre una RuntimeException, Spring hace rollback.
+- Se pone en servicios, no en controladores ni repositorios.
+
+[Ejercicio - Crear un pedido completo](./crear-pedido.md)
 
 
 ## BLOQUE C
@@ -603,6 +617,72 @@ Cuando JPA encuentra una relación entre entidades, debe decidir cuándo cargar 
 - Procesar error 400/404 de forma limpia
 - Mapear ErrorDTO
 - Integrarlo en MVC (mostrar error en pantalla)
+
+Ejemplo:
+
+```
+@Data
+public class ErrorDTO {
+
+    private LocalDateTime timestamp; // Momento del error
+    private int status;              // Código HTTP (404, 400, 500...)
+    private String error;            // Nombre del error: "Not Found", "Bad Request"...
+    private String message;          // Mensaje detallado
+    private String path;             // Endpoint que falló (/api/dishes, etc.)
+}
+```
+
+
+```
+public PageResponse<DishResponseDTO> getAllDishes(int page, int size) {
+
+    try {
+        return webClientAPI
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/dishes")
+                        .queryParam("page", page)
+                        .queryParam("size", size)
+                        .build()
+                )
+                .retrieve()
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        clientResponse -> clientResponse
+                                .bodyToMono(ErrorDTO.class)
+                                .defaultIfEmpty(new ErrorDTO())
+                                .flatMap(errorDto -> {
+
+                                    // Completar información si el backend no la envía
+                                    errorDto.setStatus(clientResponse.statusCode().value());
+                                    errorDto.setError(clientResponse.statusCode().getReasonPhrase());
+                                    errorDto.setTimestamp(LocalDateTime.now());
+                                    errorDto.setPath("/dishes");
+
+                                    String message = errorDto.getMessage() != null
+                                            ? errorDto.getMessage()
+                                            : "Error sin detalle al consumir el API";
+
+                                    String fullMessage = String.format(
+                                            "Error %d (%s) en %s: %s",
+                                            errorDto.getStatus(),
+                                            errorDto.getError(),
+                                            errorDto.getPath(),
+                                            message
+                                    );
+
+                                    return Mono.error(new ConnectionApiRestException(fullMessage));
+                                })
+                )
+                .bodyToMono(new ParameterizedTypeReference<PageResponse<DishResponseDTO>>() {})
+                .block();
+
+    } catch (Exception e) {
+        throw new ConnectionApiRestException("Error de comunicación con el API: " + e.getMessage());
+    }
+}
+
+```
 
 
 ### C.2 JJWT
