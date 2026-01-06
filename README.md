@@ -35,7 +35,7 @@ https://github.com/profeMelola/DWES-03-2025-26/tree/main/EJERCICIOS/FoodExpress
 
 ### A.2. Mejoras MVC
 
-#### Evitar F5-doble-submit (Post–Redirect–Get). FlashAttributes
+#### A.2.1. Evitar F5-doble-submit (Post–Redirect–Get). FlashAttributes
 
 ![alt text](image-20.png)
 
@@ -89,7 +89,7 @@ public String create(
 
 Vista completa actualizada: https://github.com/profeMelola/ProyectoFoodExpress/blob/main/FoodExpress/recursosII/create-success.html
 
-#### Componentización. Fragmentos
+#### A.2.2. Componentización. Fragmentos
 
 - Evitar duplicar HTML.
 - Mejorar legibilidad.
@@ -200,6 +200,66 @@ Y se usaría así:
 <div th:replace="~{fragments/form-field :: field('Phone', 'phone')}"></div>
 
 ```
+
+#### A.2.3. Internacionalización (i18n)
+
+Spring Boot los detecta automáticamente si se llaman messages.
+
+```
+src/main/resources/messages.properties        (idioma por defecto)
+src/main/resources/messages_es.properties     (español)
+src/main/resources/messages_en.properties     (inglés)
+
+```
+
+**messages_en.properties:**
+
+```
+username.exists=Username already exists
+password.mismatch=Passwords do not match
+```
+
+**messages_es.properties:**
+
+```
+username.exists=El nombre de usuario ya existe
+password.mismatch=Las contraseñas no coinciden
+```
+
+
+Además configura el encoding UTF-8 para los mensajes en español:
+
+![alt text](image-3.png)
+
+Ejemplo de código para su uso donde **el controlador NO debe encargarse de crear los mensajes, sino de gestionar la lógica:**
+
+```
+catch (UsernameAlreadyExistsException e) {
+    bindingResult.rejectValue(
+        "username",
+        "username.exists"
+    );
+    return "register";
+}
+catch (PasswordsDoNotMatchException e) {
+    bindingResult.rejectValue(
+        "confirmPassword",
+        "password.mismatch"
+    );
+    return "register";
+}
+
+```
+
+Spring utiliza el Locale activo. Por defecto, usa el idioma del navegador:
+
+- Si el navegador está en español → messages_es.properties
+- Si no → messages.properties
+
+
+Resultado:
+
+<img src="image-4.png" alt="Encoding settings" width="250">
 
 ---
 
