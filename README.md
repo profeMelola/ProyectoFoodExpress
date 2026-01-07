@@ -31,7 +31,7 @@ https://github.com/profeMelola/DWES-03-2025-26/tree/main/EJERCICIOS/FoodExpress
 
 ### A.1. Spring I
 - Explicación del examen.
-- Introducción a Testing.
+- Introducción a Testing: fuera del ámbito de examen (ni ordinaria ni extraordinaria). Dejaré publicada una práctica guiada como toma de contacto.
 
 ### A.2. Mejoras MVC
 
@@ -260,6 +260,9 @@ Spring utiliza el Locale activo. Por defecto, usa el idioma del navegador:
 Resultado:
 
 <img src="image-4.png" alt="Encoding settings" width="250">
+
+
+[¿Cómo sería la internacionalización en los mensajes de validación de un DTO?](internacionalizacion.md)
 
 ---
 
