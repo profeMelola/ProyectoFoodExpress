@@ -517,6 +517,7 @@ Implementa el código partiendo de este método del respositorio:
     List<OrderSummaryDTO> findAllOrderSummaries();
 ```
 
+[Nuevos endpoints con JPQL Avanzado](jpql-avanzado.md)
 
 - ¿Cuánto ha gastado cada cliente?
 - ¿Qué restaurantes tienen más ventas?
