@@ -524,6 +524,7 @@ Implementa el código partiendo de este método del respositorio:
 - ¿Cuáles son los platos más vendidos? 
 
 
+[Categoría como un enumerado](categorias-enum.md)
 
 
 #### **Estrategias LAZY, EAGER**
