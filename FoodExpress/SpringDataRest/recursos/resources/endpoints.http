@@ -1,0 +1,23 @@
+###
+GET http://localhost:8081/api
+###
+GET http://localhost:8081/api/books
+###
+GET http://localhost:8081/api/books/1
+###
+GET http://localhost:8081/api/authors
+###
+GET http://localhost:8081/api/members
+###
+GET http://localhost:8081/api/loans
+###
+# Dame el recurso asociado author del Book con id = 3
+# Permite navegar a la entidad relacionada gracias a la anotación @ManyToOne.
+# Spring Data REST devuelve directamente el recurso asociado, siguiendo el principio HATEOAS, sin necesidad de escribir ningún controlador.
+GET http://localhost:8081/api/books/3/author
+###
+GET http://localhost:8081/api/loans/1/book
+###
+GET http://localhost:8081/api/loans/1/member
+###
+GET http://localhost:8081/api/books?page=0&size=3&sort=title,asc

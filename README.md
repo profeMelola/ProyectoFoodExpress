@@ -992,6 +992,8 @@ La inmensa mayoría de las llamadas HTTP devuelven:
 - Paginated + HATEOAS
 - Integrarlo con Swagger UI
 
+[Spring Data Rest](./FoodExpress/SpringDataRest/SpringDataRest.md)
+
 
 ---
 
