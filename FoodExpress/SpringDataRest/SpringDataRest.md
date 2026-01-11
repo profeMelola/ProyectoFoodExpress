@@ -131,6 +131,17 @@ Además de las dependencias de siempre para un proyecto Spring API Rest (no vamo
 
 <img src="image-8.png" height="150"/>
 
+**Securización y CORS**
+
+No vamos a añadir Spring Security y además no hace falta configurar CORS. ¿Por qué no necesito configurar CORS en mi entorno?
+
+Mismo host con puerto distinto NO es el mismo origen (origin = esquema + host + puerto) y tendría que configurar CORS. Es decir:
+
+Ahora bien, CORS solo te afecta cuando el navegador hace la petición (JavaScript fetch, axios, etc.).
+
+En nuestra arquitectura, el consumo lo hace el servidor MVC con WebClient, es decir, una llamada server-to-server. Aquí CORS no aplica.
+
+
 ## Configuración
 
 Añade en application.properties las siguientes propiedades:
