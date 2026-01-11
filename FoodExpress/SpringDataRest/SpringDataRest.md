@@ -168,10 +168,11 @@ Descarga las entidades de la carpeta recursos.
 **@RepositoryRestResource(path = "authors")**
 Indica que este repositorio debe exponerse como un recurso REST accesible en la ruta /authors
 
+Por otro lado, el repositorio ES el endpoint, y ahí sí importa cómo se llaman los parámetros HTTP, por eso especificamos @Param en los métodos.
+
 ```
 @RepositoryRestResource(path = "authors")
 public interface AuthorRepository extends JpaRepository<Author, Long> {
-
     List<Author> findByFullNameContainingIgnoreCase(@Param("q") String q);
 }
 ```
