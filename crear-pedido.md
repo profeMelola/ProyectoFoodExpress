@@ -49,48 +49,82 @@ public class OrderService {
     private final RestaurantRepository restaurantRepository;
     private final DishRepository dishRepository;
 
-    public OrderService(
-            OrderRepository orderRepository,
-            OrderDetailRepository orderDetailRepository,
-            UserRepository userRepository,
-            RestaurantRepository restaurantRepository,
-            DishRepository dishRepository
-    ) {
-        this.orderRepository = orderRepository;
-        this.orderDetailRepository = orderDetailRepository;
-        this.userRepository = userRepository;
-        this.restaurantRepository = restaurantRepository;
-        this.dishRepository = dishRepository;
-    }
-
     @Transactional
-    public Order createOrder(CreateOrderDTO dto) {
+    public OrderCreatedResponseDTO createOrder(CreateOrderDTO dto) {
 
+        // Cargar agregados principales
+        User user = userRepository.findById(dto.userId())
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + dto.userId()));
+
+        Restaurant restaurant = restaurantRepository.findById(dto.restaurantId())
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant not found: " + dto.restaurantId()));
+
+        // Crear Order
         Order order = new Order();
-        order.setUser(userRepository.findById(dto.userId()).orElseThrow());
-        order.setRestaurant(restaurantRepository.findById(dto.restaurantId()).orElseThrow());
-        order.setStatus("CREATED");
+        order.setUser(user);
+        order.setRestaurant(restaurant);
+        order.setStatus(OrderStatus.CREADO);
         order.setOrderDate(LocalDateTime.now());
 
         orderRepository.save(order);
 
+        // Crear detalles
+        BigDecimal total = BigDecimal.ZERO;
+        List<OrderLineResponseDTO> responseLines = new ArrayList<>();
+
         for (OrderItemDTO item : dto.items()) {
 
             Dish dish = dishRepository.findById(item.dishId())
-                    .orElseThrow(() -> new IllegalArgumentException("Dish not found"));
+                    .orElseThrow(() -> new EntityNotFoundException("Dish not found: " + item.dishId()));
+
+            // Validar que el plato pertenece al restaurante del pedido
+            if (dish.getRestaurant() == null || dish.getRestaurant().getId() == null ||
+                !dish.getRestaurant().getId().equals(dto.restaurantId())) {
+                throw new IllegalArgumentException("Dish " + dish.getId() + " does not belong to restaurant " + dto.restaurantId());
+            }
+
+            BigDecimal unitPrice = dish.getPrice(); // o dish.getBasePrice() / price final según tu modelo
+            if (unitPrice == null) {
+                throw new IllegalStateException("Dish price is null for dishId=" + dish.getId());
+            }
+
+            int qty = item.quantity();
+            BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(qty));
 
             OrderDetail detail = new OrderDetail();
             detail.setOrder(order);
             detail.setDish(dish);
-            detail.setQuantity(item.quantity());
-            detail.setSubtotal(
-                    dish.getPrice().multiply(BigDecimal.valueOf(item.quantity()))
-            );
+            detail.setQuantity(qty);
+            detail.setSubtotal(subtotal);
+
+            // CLAVE: inicializar el EmbeddedId
+            detail.setOrderDetailId(new OrderDetailId(order.getId(), dish.getId()));
 
             orderDetailRepository.save(detail);
+
+            total = total.add(subtotal);
+
+            responseLines.add(new OrderLineResponseDTO(
+                    dish.getId(),
+                    dish.getName(),
+                    unitPrice,
+                    qty,
+                    subtotal
+            ));
         }
 
-        return order;
+
+        // Respuesta
+        return new OrderCreatedResponseDTO(
+                order.getId(),
+                user.getId(),
+                restaurant.getId(),
+                //order.getStatus(),
+                order.getStatus().name(),
+                order.getOrderDate(),
+                total,
+                responseLines
+        );
     }
 }
 
@@ -101,6 +135,26 @@ public class OrderService {
 - Spring solo hace rollback automático con RuntimeException y Error, no con Exception (excepciones checked).
     - Si la excepción es checked entonces: @Transactional(rollbackFor = Exception.class)
 
+
+**Ejemplo llamada al endpoint para crear un pedido completo:**
+
+![alt text](image-5.png)
+
+![alt text](image-6.png)
+
+
+Si probamos con el siguiente json dará error porque el plato no corresponde al restaurante en cuestión y veremos cómo funciona el rollback de la transacción:
+
+```
+{
+          "userId": 1,
+          "restaurantId": 2,
+          "items": [
+            { "dishId": 10, "quantity": 2 },
+            { "dishId": 12, "quantity": 1 }
+          ]
+        }
+```
 
 ## @Transactional en consultas (solo lectura)
 
