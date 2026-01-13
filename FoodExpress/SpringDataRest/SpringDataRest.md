@@ -115,12 +115,44 @@ Las relaciones entre entidades se definen mediante anotaciones JPA (@ManyToOne).
 
 El diagrama entidad–relación refleja una estructura típica de biblioteca, con autores que escriben libros y socios que realizan préstamos de libros.
 
-![alt text](image-5.png)
+erDiagram
+    AUTHOR ||--o{ BOOK : writes
+    BOOK   ||--o{ LOAN : is_loaned_in
+    MEMBER ||--o{ LOAN : makes
+
+    AUTHOR {
+      BIGINT id PK
+      VARCHAR fullName
+    }
+
+    BOOK {
+      BIGINT id PK
+      VARCHAR title
+      VARCHAR isbn "UNIQUE"
+      BIGINT author_id FK
+    }
+
+    MEMBER {
+      BIGINT id PK
+      VARCHAR name
+      VARCHAR email "UNIQUE"
+    }
+
+    LOAN {
+      BIGINT id PK
+      DATE loanDate
+      DATE dueDate
+      DATE returnedDate "NULLABLE"
+      BIGINT book_id FK
+      BIGINT member_id FK
+    }
+
 
 Relaciones: 
-- Author 1 ──────── N Book
-- Book   1 ──────── N Loan
-- Member 1 ──────── N Loan
+
+- AUTHOR 1 ─ N BOOK (un autor puede tener muchos libros)
+- BOOK 1 ─ N LOAN (un libro puede aparecer en muchos préstamos a lo largo del tiempo)
+- MEMBER 1 ─ N LOAN (un socio puede tener muchos préstamos)
 
 
 # Proyecto Spring Boot 4.0.1 en IntelliJ
@@ -455,3 +487,10 @@ Date: Sun, 11 Jan 2026 11:27:50 GMT
   }
 }
 ```
+
+
+--- 
+
+# Otro modelo totalmente diferente
+
+![alt text](image-5.png)
